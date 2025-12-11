@@ -1,481 +1,755 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>资源管理</title>
-    <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
-            background: #f4f6f8; 
-            margin: 0; 
-            padding: 20px; 
-        }
-        
-        .container { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-        }
-        
-        .admin-header {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        
-        .admin-header h1 {
-            margin: 0 0 10px 0;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .home-link {
-            color: #007bff;
-            text-decoration: none;
-            font-size: 14px;
-            padding: 5px 10px;
-            border: 1px solid #007bff;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-        
-        .home-link:hover {
-            background: #007bff;
-            color: white;
-        }
-        
-        .admin-header p {
-            margin: 0;
-            color: #666;
-            font-size: 14px;
-        }
-        
-        .admin-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        
-        @media (max-width: 768px) {
-            .admin-content {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .form-box, .manage-box { 
-            background: white; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
-        }
-        
-        .form-box { 
-            padding: 30px; 
-        }
-        
-        .manage-box {
-            padding: 20px;
-        }
-        
-        h2 { 
-            margin-top: 0; 
-            border-bottom: 2px solid #007bff; 
-            padding-bottom: 10px; 
-            display: inline-block; 
-        }
-        
-        .form-group { 
-            margin-bottom: 20px; 
-        }
-        
-        .form-label { 
-            display: flex; 
-            align-items: center; 
-            margin-bottom: 8px; 
-            font-weight: bold; 
-            font-size: 14px; 
-            color: #333; 
-        }
-        
-        .required {
-            color: #dc3545;
-            margin-left: 4px;
-        }
-        
-        input[type="text"], input[type="url"], textarea { 
-            width: 100%; 
-            padding: 12px; 
-            box-sizing: border-box; 
-            border: 1px solid #ddd; 
-            border-radius: 4px; 
-            font-size: 14px; 
-            transition: border-color 0.2s;
-        }
-        
-        input[type="text"]:focus, input[type="url"]:focus, textarea:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-        }
-        
-        textarea { 
-            resize: vertical; 
-        }
-        
-        .row { 
-            display: flex; 
-            gap: 15px; 
-        }
-        
-        .col { 
-            flex: 1; 
-        }
-        
-        .btn { 
-            width: 100%; 
-            padding: 12px; 
-            background: #007bff; 
-            color: white; 
-            border: none; 
-            border-radius: 4px; 
-            font-size: 16px; 
-            cursor: pointer; 
-            margin-top: 10px; 
-            transition: background 0.2s;
-        }
-        
-        .btn:hover { 
-            background: #0056b3; 
-        }
-        
-        .btn-edit {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        
-        .btn-edit:hover {
-            background: #218838;
-        }
-        
-        .link-home { 
-            display: block; 
-            text-align: center; 
-            margin-top: 20px; 
-            color: #666; 
-            text-decoration: none; 
-        }
-        
-        .hint { 
-            font-size: 12px; 
-            color: #999; 
-            margin-top: 5px; 
-        }
-        
-        .resource-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .resource-item {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 10px;
-            cursor: move;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.2s ease;
-        }
-        
-        .resource-item:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            background: #fff;
-        }
-        
-        .resource-item.sortable-ghost {
-            opacity: 0.4;
-            background: #e3f2fd;
-        }
-        
-        .resource-item.sortable-drag {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transform: rotate(2deg);
-            background: #fff;
-        }
-        
-        .drag-handle {
-            color: #999;
-            font-size: 20px;
-            cursor: grab;
-            padding: 5px;
-            border-radius: 4px;
-            transition: all 0.2s;
-            user-select: none;
-        }
-        
-        .drag-handle:hover {
-            color: #007bff;
-            background: rgba(0, 123, 255, 0.1);
-        }
-        
-        .drag-handle:active {
-            cursor: grabbing;
-        }
-        
-        .resource-info {
-            flex: 1;
-        }
-        
-        .resource-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #333;
-        }
-        
-        .resource-type {
-            color: #666;
-            font-size: 12px;
-            margin-bottom: 5px;
-        }
-        
-        .resource-desc {
-            color: #888;
-            font-size: 13px;
-        }
-        
-        .empty-resources {
-            text-align: center;
-            color: #999;
-            padding: 40px 20px;
-        }
-        
-        .save-indicator {
-            text-align: center;
-            padding: 10px;
-            background: #d4edda;
-            color: #155724;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .drag-tip {
-            background: #e3f2fd;
-            border: 1px solid #2196f3;
-            border-radius: 4px;
-            padding: 10px;
-            font-size: 12px;
-            color: #1976d2;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .drag-tip::before {
-            content: "💡";
-            font-size: 16px;
-        }
-        
-        .link-example {
-            font-size: 12px;
-            color: #999;
-            font-style: italic;
-            margin-top: 4px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="admin-header">
-            <h1>
-                🔧 资源管理中心
-                <a href="/" class="home-link">🏠 返回主页</a>
-            </h1>
-            <p>拖拽资源卡片可以调整显示顺序，新添加的资源会排在最后。点击编辑按钮可以修改资源信息。</p>
-        </div>
-        
-        <div class="admin-content">
-            <!-- 左侧：添加资源表单 -->
-            <div class="form-box">
-                <h2>➕ 添加新资源</h2>
-                <form method="POST">
-                    <!-- 资源名称 -->
-                    <div class="form-group">
-                        <label class="form-label">
-                            {{ form_config.name.label }} <span class="required">*</span>
-                        </label>
-                        <input type="text" name="name" required placeholder="{{ form_config.name.placeholder }}">
-                    </div>
+<!DOCTYPE html>  
+<html lang="zh-CN">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>资源管理</title>  
+    <style>  
+        body {  
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;  
+            background: #f4f6f8;  
+            margin: 0;  
+            padding: 20px;  
+        }  
+        .container {  
+            max-width: 1200px;  
+            margin: 0 auto;  
+        }  
+        .admin-header {  
+            background: white;  
+            padding: 20px;  
+            border-radius: 8px;  
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);  
+            margin-bottom: 20px;  
+        }  
+          
+        .admin-header h1 {  
+            margin: 0 0 10px 0;  
+            color: #333;  
+            display: flex;  
+            align-items: center;  
+            gap: 10px;  
+        }  
+          
+        .home-link {  
+            color: #007bff;  
+            text-decoration: none;  
+            font-size: 14px;  
+            padding: 5px 10px;  
+            border: 1px solid #007bff;  
+            border-radius: 4px;  
+            transition: all 0.2s;  
+        }  
+          
+        .home-link:hover {  
+            background: #007bff;  
+            color: white;  
+        }  
+          
+        .admin-header p {  
+            margin: 0;  
+            color: #666;  
+            font-size: 14px;  
+        }  
+          
+        .admin-content {  
+            display: grid;  
+            grid-template-columns: 1fr 1fr;  
+            gap: 20px;  
+        }  
+          
+        @media (max-width: 768px) {  
+            .admin-content {  
+                grid-template-columns: 1fr;  
+            }  
+        }  
+          
+        .form-box, .manage-box, .notice-box, .database-box {  
+            background: white;  
+            border-radius: 8px;  
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);  
+        }  
+          
+        .form-box {  
+            padding: 30px;  
+        }  
+          
+        .manage-box, .notice-box, .database-box {  
+            padding: 20px;  
+        }  
+          
+        .notice-box {  
+            grid-column: 1 / -1;  
+            margin-bottom: 20px;  
+        }  
+          
+        .database-box {  
+            grid-column: 1 / -1;  
+            margin-bottom: 20px;  
+        }  
+          
+        h2 {  
+            margin-top: 0;  
+            border-bottom: 2px solid #007bff;  
+            padding-bottom: 10px;  
+            display: inline-block;  
+        }  
+          
+        .form-group {  
+            margin-bottom: 20px;  
+        }  
+          
+        .form-label {  
+            display: flex;  
+            align-items: center;  
+            margin-bottom: 8px;  
+            font-weight: bold;  
+            font-size: 14px;  
+            color: #333;  
+        }  
+          
+        .required {  
+            color: #dc3545;  
+            margin-left: 4px;  
+        }  
+          
+        input[type="text"], input[type="url"], textarea {  
+            width: 100%;  
+            padding: 12px;  
+            box-sizing: border-box;  
+            border: 1px solid #ddd;  
+            border-radius: 4px;  
+            font-size: 14px;  
+            transition: border-color 0.2s;  
+        }  
+          
+        input[type="text"]:focus, input[type="url"]:focus, textarea:focus {  
+            outline: none;  
+            border-color: #007bff;  
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);  
+        }  
+          
+        textarea {  
+            resize: vertical;  
+            min-height: 100px;  
+        }  
+          
+        .row {  
+            display: flex;  
+            gap: 15px;  
+        }  
+          
+        .col {  
+            flex: 1;  
+        }  
+          
+        .btn {  
+            width: 100%;  
+            padding: 12px;  
+            background: #007bff;  
+            color: white;  
+            border: none;  
+            border-radius: 4px;  
+            font-size: 16px;  
+            cursor: pointer;  
+            margin-top: 10px;  
+            transition: background 0.2s;  
+        }  
+          
+        .btn:hover {  
+            background: #0056b3;  
+        }  
+          
+        .btn-notice {  
+            background: #28a745;  
+        }  
+          
+        .btn-notice:hover {  
+            background: #218838;  
+        }  
+          
+        .btn-edit {  
+            background: #28a745;  
+            color: white;  
+            border: none;  
+            padding: 6px 12px;  
+            border-radius: 4px;  
+            font-size: 12px;  
+            cursor: pointer;  
+            transition: background 0.2s;  
+        }  
+          
+        .btn-edit:hover {  
+            background: #218838;  
+        }  
+          
+        .btn-export {  
+            background: #28a745;  
+        }  
+          
+        .btn-export:hover {  
+            background: #218838;  
+        }  
+          
+        .btn-danger {  
+            background: #dc3545;  
+        }  
+          
+        .btn-danger:hover {  
+            background: #c82333;  
+        }  
+          
+        .btn-warning {  
+            background: #ffc107;  
+            color: #212529;  
+        }  
+          
+        .btn-warning:hover {  
+            background: #e0a800;  
+        }  
+          
+        .link-home {  
+            display: block;  
+            text-align: center;  
+            margin-top: 20px;  
+            color: #666;  
+            text-decoration: none;  
+        }  
+          
+        .hint {  
+            font-size: 12px;  
+            color: #999;  
+            margin-top: 5px;  
+        }  
+          
+        .checkbox-group {  
+            display: flex;  
+            align-items: center;  
+            gap: 8px;  
+        }  
+          
+        input[type="checkbox"] {  
+            width: 16px;  
+            height: 16px;  
+        }  
+          
+        input[type="file"] {  
+            width: 100%;  
+            padding: 10px;  
+            box-sizing: border-box;  
+            border: 1px solid #ddd;  
+            border-radius: 4px;  
+            font-size: 14px;  
+        }  
+          
+        /* switch开关样式 */  
+        .switch-group {  
+            display: flex;  
+            align-items: center;  
+            justify-content: space-between;  
+            padding: 15px;  
+            background: #f8f9fa;  
+            border-radius: 4px;  
+            margin-bottom: 15px;  
+        }  
+          
+        .switch-label {  
+            display: flex;  
+            align-items: center;  
+            gap: 8px;  
+            font-weight: bold;  
+            font-size: 14px;  
+            color: #333;  
+            margin: 0;  
+        }  
+          
+        .switch {  
+            position: relative;  
+            display: inline-block;  
+            width: 60px;  
+            height: 28px;  
+        }  
+          
+        .switch input {  
+            opacity: 0;  
+            width: 0;  
+            height: 0;  
+        }  
+          
+        .slider {  
+            position: absolute;  
+            cursor: pointer;  
+            top: 0;  
+            left: 0;  
+            right: 0;  
+            bottom: 0;  
+            background-color: #ccc;  
+            transition: .4s;  
+            border-radius: 28px;  
+        }  
+          
+        .slider:before {  
+            position: absolute;  
+            content: "";  
+            height: 20px;  
+            width: 20px;  
+            left: 4px;  
+            bottom: 4px;  
+            background-color: white;  
+            transition: .4s;  
+            border-radius: 50%;  
+        }  
+          
+        input:checked + .slider {  
+            background-color: #28a745;  
+        }  
+          
+        input:checked + .slider:before {  
+            transform: translateX(32px);  
+        }  
+          
+        .switch-status {  
+            font-size: 12px;  
+            margin-left: 8px;  
+        }  
+          
+        .status-enabled {  
+            color: #28a745;  
+        }  
+          
+        .status-disabled {  
+            color: #dc3545;  
+        }  
+          
+        .resource-list {  
+            list-style: none;  
+            padding: 0;  
+            margin: 0;  
+        }  
+          
+        .resource-item {  
+            background: #f8f9fa;  
+            border: 1px solid #e9ecef;  
+            border-radius: 6px;  
+            padding: 15px;  
+            margin-bottom: 10px;  
+            cursor: move;  
+            display: flex;  
+            align-items: center;  
+            gap: 10px;  
+            transition: all 0.2s ease;  
+        }  
+          
+        .resource-item:hover {  
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);  
+            background: #fff;  
+        }  
+          
+        .resource-item.sortable-ghost {  
+            opacity: 0.4;  
+            background: #e3f2fd;  
+        }  
+          
+        .resource-item.sortable-drag {  
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);  
+            transform: rotate(2deg);  
+            background: #fff;  
+        }  
+          
+        .drag-handle {  
+            color: #999;  
+            font-size: 20px;  
+            cursor: grab;  
+            padding: 5px;  
+            border-radius: 4px;  
+            transition: all 0.2s;  
+            user-select: none;  
+        }  
+          
+        .drag-handle:hover {  
+            color: #007bff;  
+            background: rgba(0, 123, 255, 0.1);  
+        }  
+          
+        .drag-handle:active {  
+            cursor: grabbing;  
+        }  
+          
+        .resource-info {  
+            flex: 1;  
+        }  
+          
+        .resource-name {  
+            font-weight: bold;  
+            margin-bottom: 5px;  
+            color: #333;  
+        }  
+          
+        .resource-type {  
+            color: #666;  
+            font-size: 12px;  
+            margin-bottom: 5px;  
+        }  
+          
+        .resource-desc {  
+            color: #888;  
+            font-size: 13px;  
+        }  
+          
+        .empty-resources {  
+            text-align: center;  
+            color: #999;  
+            padding: 40px 20px;  
+        }  
+          
+        .save-indicator {  
+            text-align: center;  
+            padding: 10px;  
+            background: #d4edda;  
+            color: #155724;  
+            border-radius: 4px;  
+            margin-bottom: 15px;  
+            display: none;  
+            animation: fadeIn 0.3s ease;  
+        }  
+          
+        .alert {  
+            padding: 15px;  
+            margin-bottom: 20px;  
+            border-radius: 4px;  
+            animation: fadeIn 0.3s ease;  
+        }  
+          
+        .alert-success {  
+            background: #d4edda;  
+            color: #155724;  
+            border: 1px solid #c3e6cb;  
+        }  
+          
+        .alert-danger {  
+            background: #f8d7da;  
+            color: #721c24;  
+            border: 1px solid #f5c6cb;  
+        }  
+          
+        @keyframes fadeIn {  
+            from { opacity: 0; transform: translateY(-10px); }  
+            to { opacity: 1; transform: translateY(0); }  
+        }  
+          
+        .drag-tip {  
+            background: #e3f2fd;  
+            border: 1px solid #2196f3;  
+            border-radius: 4px;  
+            padding: 10px;  
+            font-size: 12px;  
+            color: #1976d2;  
+            margin-bottom: 15px;  
+            display: flex;  
+            align-items: center;  
+            gap: 8px;  
+        }  
+          
+        .drag-tip::before {  
+            content: "💡";  
+            font-size: 16px;  
+        }  
+          
+        .link-example {  
+            font-size: 12px;  
+            color: #999;  
+            font-style: italic;  
+            margin-top: 4px;  
+        }  
+          
+        .db-actions {  
+            display: grid;  
+            grid-template-columns: 1fr 1fr;  
+            gap: 15px;  
+            margin-top: 15px;  
+        }  
+          
+        @media (max-width: 768px) {  
+            .db-actions {  
+                grid-template-columns: 1fr;  
+            }  
+        }  
+    </style>  
+</head>  
+<body>  
+    <div class="container">  
+        <div class="admin-header">  
+            <h1>  
+                🔧 资源管理中心  
+                <a href="/" class="home-link">🏠 返回主页</a>  
+            </h1>  
+            <p>拖拽资源卡片可以调整显示顺序，新添加的资源会排在最后。点击编辑按钮可以修改资源信息。</p>  
+        </div>  
 
-                    <!-- 资源类型 -->
-                    <div class="form-group">
-                        <label class="form-label">
-                            {{ form_config.r_type.label }}
-                        </label>
-                        <input type="text" list="types" name="r_type" placeholder="{{ form_config.r_type.placeholder }}">
-                        <datalist id="types">
-                            {% for option in form_config.r_type.options %}
-                                <option value="{{ option }}">
-                            {% endfor %}
-                        </datalist>
-                        <div class="link-example">示例: 软件工具, 影视资源, 学习教程</div>
-                    </div>
+        <!-- 消息提示 -->  
+        {% with messages = get_flashed_messages(with_categories=true) %}  
+            {% if messages %}  
+                {% for category, message in messages %}  
+                    <div class="alert alert-{{ category }}">  
+                        {{ message }}  
+                    </div>  
+                {% endfor %}  
+            {% endif %}  
+        {% endwith %}  
 
-                    <!-- 描述 -->
-                    <div class="form-group">
-                        <label class="form-label">
-                            {{ form_config.description.label }}
-                        </label>
-                        <textarea name="description" rows="3" placeholder="{{ form_config.description.placeholder }}"></textarea>
-                    </div>
+        <div class="admin-content">  
+            <!-- 数据库管理 -->  
+            <div class="database-box">  
+                <h2>💾 数据库管理</h2>  
+                <div class="db-actions">  
+                    <div>  
+                        <h3>📤 导出数据库</h3>  
+                        <p style="font-size: 14px; color: #666; margin-bottom: 10px;">将所有资源和公告数据导出为JSON文件</p>  
+                        <form action="/admin/export_db" method="GET">  
+                            <button type="submit" class="btn btn-export">📥 下载数据库备份</button>  
+                        </form>  
+                    </div>  
+                    <div>  
+                        <h3>📥 导入数据库</h3>  
+                        <p style="font-size: 14px; color: #666; margin-bottom: 10px;">从JSON文件恢复数据库（会覆盖现有数据）</p>  
+                        <form action="/admin/import_db" method="POST" enctype="multipart/form-data" onsubmit="return confirm('确定要导入数据库吗？这将覆盖现有的所有数据！')">  
+                            <input type="file" name="db_file" accept=".json" required style="margin-bottom: 10px;">  
+                            <button type="submit" class="btn btn-warning">📤 导入数据库</button>  
+                        </form>  
+                    </div>  
+                </div>  
+            </div>  
 
-                    <!-- Telegram 链接 -->
-                    <div class="form-group">
-                        <label class="form-label">
-                            {{ form_config.tg_link.label }}
-                        </label>
-                        <input type="url" name="tg_link" placeholder="{{ form_config.tg_link.placeholder }}">
-                        <div class="link-example">格式: https://t.me/your_channel</div>
-                    </div>
+        <!-- 公告管理 -->  
+        <div class="notice-box">  
+            <h2>📢 公告管理</h2>  
+              
+            <!-- 公告开关 -->  
+            <div class="switch-group">  
+                <label class="switch-label">  
+                    <span>📢</span>  
+                    <span>公告开关</span>  
+                </label>  
+                <div style="display: flex; align-items: center;">  
+                    <label class="switch">  
+                        <input type="checkbox" id="noticeSwitch" {% if notice.is_enabled == 1 %}checked{% endif %}>  
+                        <span class="slider"></span>  
+                    </label>  
+                    <span class="switch-status {% if notice.is_enabled == 1 %}status-enabled{% else %}status-disabled{% endif %}" id="switchStatus">  
+                        {% if notice.is_enabled == 1 %}已开启{% else %}已关闭{% endif %}  
+                    </span>  
+                </div>  
+            </div>  
+              
+            <form method="POST">  
+                <div class="form-group">  
+                    <label class="form-label">  
+                        公告内容 <span class="required">*</span>  
+                    </label>  
+                    <textarea name="notice_content" required placeholder="输入公告内容，支持HTML格式">{{ notice.content or '' }}</textarea>  
+                    <div class="hint">公告将显示在网站首页弹窗，支持HTML格式</div>  
+                </div>  
+                  
+                <button type="submit" class="btn btn-notice">💾 保存公告</button>  
+            </form>  
+        </div>  
+          
+        <!-- 左侧：添加资源表单 -->  
+        <div class="form-box">  
+            <h2>➕ 添加新资源</h2>  
+            <form method="POST">  
+                <!-- 资源名称 -->  
+                <div class="form-group">  
+                    <label class="form-label">  
+                        {{ form_config.name.label }} <span class="required">*</span>  
+                    </label>  
+                    <input type="text" name="name" required placeholder="{{ form_config.name.placeholder }}">  
+                </div>  
 
-                    <!-- 网盘链接和密码 -->
-                    <div class="row">
-                        <div class="col" style="flex: 2;">
-                            <label class="form-label">
-                                {{ form_config.pan_link.label }}
-                            </label>
-                            <input type="url" name="pan_link" placeholder="{{ form_config.pan_link.placeholder }}">
-                            <div class="link-example">支持: 百度网盘, 阿里云盘等</div>
-                        </div>
-                        <div class="col">
-                            <label class="form-label">
-                                {{ form_config.pan_pass.label }}
-                            </label>
-                            <input type="text" name="pan_pass" placeholder="{{ form_config.pan_pass.placeholder }}">
-                        </div>
-                    </div>
+                <!-- 资源类型 -->  
+                <div class="form-group">  
+                    <label class="form-label">  
+                        {{ form_config.r_type.label }}  
+                    </label>  
+                    <input type="text" list="types" name="r_type" placeholder="{{ form_config.r_type.placeholder }}">  
+                    <datalist id="types">  
+                        {% for option in form_config.r_type.options %}  
+                            <option value="{{ option }}">  
+                        {% endfor %}  
+                    </datalist>  
+                    <div class="link-example">示例: 软件工具, 影视资源, 学习教程</div>  
+                </div>  
 
-                    <!-- 标签 -->
-                    <div class="form-group">
-                        <label class="form-label">
-                            {{ form_config.tags.label }}
-                        </label>
-                        <input type="text" name="tags" placeholder="{{ form_config.tags.placeholder }}">
-                        {% if form_config.tags.hint %}
-                            <div class="hint">{{ form_config.tags.hint }}</div>
-                        {% endif %}
-                    </div>
-                    
-                    <button type="submit" class="btn">发布资源</button>
-                </form>
-                <a href="/" class="link-home">🏠 返回主页</a>
-            </div>
+                <!-- 描述 -->  
+                <div class="form-group">  
+                    <label class="form-label">  
+                        {{ form_config.description.label }}  
+                    </label>  
+                    <textarea name="description" rows="3" placeholder="{{ form_config.description.placeholder }}"></textarea>  
+                </div>  
+
+                <!-- Telegram 链接 -->  
+                <div class="form-group">  
+                    <label class="form-label">  
+                        {{ form_config.tg_link.label }}  
+                    </label>  
+                    <input type="url" name="tg_link" placeholder="{{ form_config.tg_link.placeholder }}">  
+                    <div class="link-example">格式: https://t.me/your_channel</div>  
+                </div>  
+
+                <!-- 网盘链接和密码 -->  
+                <div class="row">  
+                    <div class="col" style="flex: 2;">  
+                        <label class="form-label">  
+                            {{ form_config.pan_link.label }}  
+                        </label>  
+                        <input type="url" name="pan_link" placeholder="{{ form_config.pan_link.placeholder }}">  
+                        <div class="link-example">支持: 百度网盘, 阿里云盘等</div>  
+                    </div>  
+                    <div class="col">  
+                        <label class="form-label">  
+                            {{ form_config.pan_pass.label }}  
+                        </label>  
+                        <input type="text" name="pan_pass" placeholder="{{ form_config.pan_pass.placeholder }}">  
+                    </div>  
+                </div>  
+
+                <!-- 标签 -->  
+                <div class="form-group">  
+                    <label class="form-label">  
+                        {{ form_config.tags.label }}  
+                    </label>  
+                    <input type="text" name="tags" placeholder="{{ form_config.tags.placeholder }}">  
+                    {% if form_config.tags.hint %}  
+                        <div class="hint">{{ form_config.tags.hint }}</div>  
+                    {% endif %}  
+                </div>  
+                  
+                <button type="submit" class="btn">发布资源</button>  
+            </form>  
+            <a href="/" class="link-home">🏠 返回主页</a>  
+        </div>  
             
-            <!-- 右侧：资源管理 -->
-            <div class="manage-box">
-                <h2>📋 资源排序管理</h2>
-                <div class="save-indicator" id="saveIndicator">
-                    ✅ 排序已保存
-                </div>
-                
-                <div class="drag-tip">
-                    拖拽左侧的 ⋮⋮ 图标可以调整资源显示顺序，点击编辑按钮修改资源信息
-                </div>
-                
-                {% if resources %}
-                    <ul class="resource-list" id="resourceList">
-                        {% for item in resources %}
-                            <li class="resource-item" data-id="{{ item.id }}">
-                                <span class="drag-handle">⋮⋮</span>
-                                <div class="resource-info">
-                                    <div class="resource-name">{{ item.name }}</div>
-                                    {% if item.r_type %}
-                                        <div class="resource-type">{{ item.r_type }}</div>
-                                    {% endif %}
-                                    {% if item.description %}
-                                        <div class="resource-desc">{{ item.description[:50] }}...</div>
-                                    {% endif %}
-                                </div>
-                                <div class="resource-actions">
-                                    <form method="GET" action="{{ url_for('edit_resource', resource_id=item.id) }}" 
-                                          style="display: inline;">
-                                        <button type="submit" class="btn-edit">✏️ 编辑</button>
-                                    </form>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <div class="empty-resources">
-                        <p>📝 暂无资源</p>
-                        <p style="font-size: 12px; margin-top: 10px;">在左侧表单添加第一个资源开始吧！</p>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+        <!-- 右侧：资源管理 -->  
+        <div class="manage-box">  
+            <h2>📋 资源排序管理</h2>  
+            <div class="save-indicator" id="saveIndicator">  
+                ✅ 排序已保存  
+            </div>  
+              
+            <div class="drag-tip">  
+                拖拽左侧的 ⋮⋮ 图标可以调整资源显示顺序，点击编辑按钮修改资源信息  
+            </div>  
+              
+            {% if resources %}  
+                <ul class="resource-list" id="resourceList">  
+                    {% for item in resources %}  
+                        <li class="resource-item" data-id="{{ item.id }}">  
+                            <span class="drag-handle">⋮⋮</span>  
+                            <div class="resource-info">  
+                                <div class="resource-name">{{ item.name }}</div>  
+                                {% if item.r_type %}  
+                                    <div class="resource-type">{{ item.r_type }}</div>  
+                                {% endif %}  
+                                {% if item.description %}  
+                                    <div class="resource-desc">{{ item.description[:50] }}...</div>  
+                                {% endif %}  
+                            </div>  
+                            <div class="resource-actions">  
+                                <form method="GET" action="{{ url_for('edit_resource', resource_id=item.id) }}"   
+                                      style="display: inline;">  
+                                    <button type="submit" class="btn-edit">✏️ 编辑</button>  
+                                </form>  
+                            </div>  
+                        </li>  
+                    {% endfor %}  
+                </ul>  
+            {% else %}  
+                <div class="empty-resources">  
+                    <p>📝 暂无资源</p>  
+                    <p style="font-size: 12px; margin-top: 10px;">在左侧表单添加第一个资源开始吧！</p>  
+                </div>  
+            {% endif %}  
+        </div>  
+    </div>  
+</div>  
 
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const resourceList = document.getElementById('resourceList');
-            const saveIndicator = document.getElementById('saveIndicator');
+</div>  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>  <script>  
+    document.addEventListener('DOMContentLoaded', function() {  
+        const resourceList = document.getElementById('resourceList');  
+        const saveIndicator = document.getElementById('saveIndicator');  
+        const noticeSwitch = document.getElementById('noticeSwitch');  
+        const switchStatus = document.getElementById('switchStatus');  
             
-            if (resourceList) {
-                new Sortable(resourceList, {
-                    animation: 150,
-                    ghostClass: 'sortable-ghost',
-                    dragClass: 'sortable-drag',
-                    handle: '.drag-handle',
-                    onUpdate: function(evt) {
-                        const itemIds = Array.from(resourceList.children).map(item => item.dataset.id);
-                        
-                        fetch('/admin/update_order', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(itemIds)
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                saveIndicator.style.display = 'block';
-                                setTimeout(() => {
-                                    saveIndicator.style.display = 'none';
-                                }, 2000);
-                            } else {
-                                alert('保存失败：' + data.message);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('保存排序时出错，请重试');
-                        });
-                    }
-                });
-            }
-        });
-    </script>
-</body>
+        // 公告开关控制  
+        noticeSwitch.addEventListener('change', function() {  
+            const enabled = this.checked;  
+              
+            fetch('/admin/notice/toggle', {  
+                method: 'POST',  
+                headers: {  
+                    'Content-Type': 'application/json',  
+                },  
+                body: JSON.stringify({ enabled: enabled })  
+            })  
+            .then(response => response.json())  
+            .then(data => {  
+                if (data.success) {  
+                    // 更新状态显示  
+                    if (enabled) {  
+                        switchStatus.textContent = '已开启';  
+                        switchStatus.className = 'switch-status status-enabled';  
+                    } else {  
+                        switchStatus.textContent = '已关闭';  
+                        switchStatus.className = 'switch-status status-disabled';  
+                    }  
+                } else {  
+                    alert('操作失败：' + data.message);  
+                    // 恢复开关状态  
+                    this.checked = !enabled;  
+                }  
+            })  
+            .catch(error => {  
+                console.error('Error:', error);  
+                alert('操作时出错，请重试');  
+                this.checked = !enabled;  
+            });  
+        });  
+            
+        if (resourceList) {  
+            new Sortable(resourceList, {  
+                animation: 150,  
+                ghostClass: 'sortable-ghost',  
+                dragClass: 'sortable-drag',  
+                handle: '.drag-handle',  
+                onUpdate: function(evt) {  
+                    const itemIds = Array.from(resourceList.children).map(item => item.dataset.id);  
+                      
+                    fetch('/admin/update_order', {  
+                        method: 'POST',  
+                        headers: {  
+                            'Content-Type': 'application/json',  
+                        },  
+                        body: JSON.stringify(itemIds)  
+                    })  
+                    .then(response => response.json())  
+                    .then(data => {  
+                        if (data.success) {  
+                            saveIndicator.style.display = 'block';  
+                            setTimeout(() => {  
+                                saveIndicator.style.display = 'none';  
+                            }, 2000);  
+                        } else {  
+                            alert('保存失败：' + data.message);  
+                        }  
+                    })  
+                    .catch(error => {  
+                        console.error('Error:', error);  
+                        alert('保存排序时出错，请重试');  
+                    });  
+                }  
+            });  
+        }  
+    });  
+</script>  </body>  
 </html>
