@@ -5,27 +5,205 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>资源分享站</title>
     <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
-            background-color: #f4f6f8; 
-            margin: 0; 
-            padding: 0; 
-            color: #333; 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        /* 公告弹窗样式 - 使用本站一致的设计风格 */
+        .notice-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .notice-modal {
+            background: white;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            margin: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            animation: slideUp 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .notice-header {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid #007bff;
+        }
+
+        .notice-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notice-close {
+            color: white;
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .notice-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .notice-content {
+            padding: 30px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #666;
+            flex-grow: 1;
+        }
+
+        .notice-content h1, .notice-content h2, .notice-content h3 {
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 8px;
+            display: inline-block;
+        }
+
+        .notice-content p {
+            margin-bottom: 15px;
+        }
+
+        .notice-content ul, .notice-content ol {
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+
+        .notice-content li {
+            margin-bottom: 5px;
+        }
+
+        .notice-content a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .notice-content a:hover {
+            text-decoration: underline;
+        }
+
+        .notice-content .tag-link {
+            display: inline-block;
+            background: #e9ecef;
+            color: #495057;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .notice-content .tag-link:hover {
+            background: #007bff;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .notice-footer {
+            padding: 15px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            border-radius: 0 0 8px 8px;
+            text-align: center;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .notice-close-btn, .notice-hide-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .notice-hide-btn {
+            background: #6c757d;
+        }
+
+        .notice-close-btn:hover {
+            background: #0056b3;
+        }
+
+        .notice-hide-btn:hover {
+            background: #545b62;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
-        .header { 
-            background-color: #333; 
-            padding: 20px 0; 
-            color: white; 
-            text-align: center; 
+        .header {
+            background-color: #333;
+            padding: 20px 0;
+            color: white;
+            text-align: center;
             position: sticky;
             top: 0;
             z-index: 1000;
         }
         
-        .header h1 { 
-            margin: 0 0 15px 0; 
-            font-size: 24px; 
+        .header h1 {
+            margin: 0 0 15px 0;
+            font-size: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -47,53 +225,53 @@
             color: white;
         }
         
-        .search-form { 
-            max-width: 600px; 
-            margin: 0 auto; 
-            display: flex; 
-            padding: 0 20px; 
-            gap: 0; 
+        .search-form {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            padding: 0 20px;
+            gap: 0;
         }
         
-        .search-input { 
-            flex: 1; 
-            padding: 10px; 
-            border-radius: 4px 0 0 4px; 
-            border: 1px solid #ccc; 
-            outline: none; 
-            color: #333; 
-            height: 40px; 
-            box-sizing: border-box; 
+        .search-input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 4px 0 0 4px;
+            border: 1px solid #ccc;
+            outline: none;
+            color: #333;
+            height: 40px;
+            box-sizing: border-box;
         }
         
-        .search-btn { 
-            padding: 10px 20px; 
-            background-color: #495057; 
-            color: white; 
-            border: none; 
-            border-radius: 0 4px 4px 0; 
-            cursor: pointer; 
-            height: 40px; 
-            line-height: 20px; 
+        .search-btn {
+            padding: 10px 20px;
+            background-color: #495057;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            height: 40px;
+            line-height: 20px;
             white-space: nowrap;
         }
         
-        .search-btn:hover { 
-            background-color: #343a40; 
+        .search-btn:hover {
+            background-color: #343a40;
         }
         
-        .search-hint { 
-            margin-top: 10px; 
-            font-size: 14px; 
-            color: #aaa; 
+        .search-hint {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #aaa;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 15px;
         }
         
-        .search-hint a { 
-            color: #66b3ff; 
+        .search-hint a {
+            color: #66b3ff;
             text-decoration: none;
             background: rgba(255, 255, 255, 0.1);
             padding: 4px 8px;
@@ -120,26 +298,26 @@
             background: #c82333;
         }
 
-        .container { 
-            max-width: 1200px; 
-            margin: 30px auto; 
-            padding: 0 20px; 
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
         }
         
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
-            gap: 20px; 
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
         }
         
-        .card { 
-            background: white; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            transition: transform 0.2s, box-shadow 0.2s; 
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         
         .card:hover {
@@ -147,133 +325,142 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         
-        .card-header-line { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: flex-start; 
-            margin-bottom: 10px; 
+        .card-header-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
         }
         
-        .card-title-group { 
-            display: flex; 
-            align-items: flex-start; 
-            padding-top: 3px; 
+        .card-title-group {
+            display: flex;
+            align-items: flex-start;
+            padding-top: 3px;
         }
         
-        .status-dot { 
-            width: 8px; 
-            height: 8px; 
-            background-color: #6f42c1; 
-            border-radius: 50%; 
-            margin-top: 5px; 
-            margin-right: 8px; 
-            flex-shrink: 0; 
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #6f42c1;
+            border-radius: 50%;
+            margin-top: 5px;
+            margin-right: 8px;
+            flex-shrink: 0;
         }
         
-        .date { 
-            font-size: 12px; 
-            color: #999; 
+        .date {
+            font-size: 12px;
+            color: #999;
         }
         
-        .card h2 { 
-            margin: 0; 
-            font-size: 18px; 
-            line-height: 1.2; 
+        .card h2 {
+            margin: 0;
+            font-size: 18px;
+            line-height: 1.2;
             color: #333;
         }
         
-        .desc { 
-            font-size: 14px; 
-            color: #666; 
-            line-height: 1.5; 
-            margin-bottom: 15px; 
-            flex-grow: 1; 
+        .desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            flex-grow: 1;
         }
         
-        .tags { 
-            margin-bottom: 15px; 
+        .tags {
+            margin-bottom: 15px;
         }
         
-        .tag { 
-            display: inline-block; 
-            background: #e9ecef; 
-            color: #495057; 
-            font-size: 12px; 
-            padding: 2px 6px; 
-            border-radius: 4px; 
-            margin-right: 5px; 
-            margin-bottom: 5px; 
+        .tag-link {
+            display: inline-block;
+            background: #e9ecef;
+            color: #495057;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .tag-link:hover {
+            background: #007bff;
+            color: white;
+            transform: translateY(-1px);
         }
         
-        .actions { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 10px; 
-        } 
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
         
-        .btn { 
-            display: block; 
-            text-align: center; 
-            text-decoration: none; 
-            padding: 10px; 
-            border-radius: 4px; 
-            font-size: 14px; 
+        .btn {
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 14px;
             transition: all 0.2s;
         }
         
-        .btn-tg { 
-            border: 1px solid #0088cc; 
-            color: #0088cc; 
-            background: white; 
+        .btn-tg {
+            border: 1px solid #0088cc;
+            color: #0088cc;
+            background: white;
         }
         
-        .btn-tg:hover { 
-            background: #f0f8ff; 
+        .btn-tg:hover {
+            background: #f0f8ff;
             border-color: #006699;
         }
         
-        .pan-group { 
-            display: flex; 
+        .pan-group {
+            display: flex;
         }
         
-        .btn-pan { 
-            background: #28a745; 
-            color: white; 
-            border: none; 
-            flex-grow: 1; 
-            border-top-left-radius: 4px; 
-            border-bottom-left-radius: 4px; 
-            border-top-right-radius: 0; 
-            border-bottom-right-radius: 0; 
+        .btn-pan {
+            background: #28a745;
+            color: white;
+            border: none;
+            flex-grow: 1;
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
             text-align: center;
             text-decoration: none;
             padding: 10px;
             transition: background 0.2s;
         }
         
-        .btn-pan:hover { 
-            background: #218838; 
+        .btn-pan:hover {
+            background: #218838;
         }
         
-        .pan-pass { 
-            background: #e8f5e9; 
-            color: #28a745; 
-            border: 1px solid #28a745; 
-            border-left: none; 
-            padding: 10px; 
-            font-size: 14px; 
-            display: flex; 
-            align-items: center; 
+        .pan-pass {
+            background: #e8f5e9;
+            color: #28a745;
+            border: 1px solid #28a745;
+            border-left: none;
+            padding: 10px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
             white-space: nowrap;
-            border-top-right-radius: 4px; 
+            border-top-right-radius: 4px;
             border-bottom-right-radius: 4px;
         }
 
-        .empty-state { 
-            text-align: center; 
-            color: #999; 
-            margin-top: 50px; 
-            grid-column: 1 / -1; 
+        .empty-state {
+            text-align: center;
+            color: #999;
+            margin-top: 50px;
+            grid-column: 1 / -1;
             padding: 40px 20px;
         }
         
@@ -294,7 +481,7 @@
         
         @media (max-width: 768px) {
             .search-form {
-                padding: 0 10px; 
+                padding: 0 10px;
                 flex-direction: column;
                 gap: 10px;
             }
@@ -313,10 +500,55 @@
             .header h1 {
                 font-size: 20px;
             }
+
+            .notice-modal {
+                width: 95%;
+                margin: 10px;
+            }
+
+            .notice-header {
+                padding: 15px;
+            }
+
+            .notice-content {
+                padding: 20px;
+            }
+
+            .notice-footer {
+                padding: 10px 20px;
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- 公告弹窗 - 只在主页显示（没有搜索时） -->
+    {% if notice and not search_query %}
+        {% set notice_key = 'notice_hidden_' + notice_id|string + '_' + notice_updated_at %}
+        <div class="notice-overlay" id="noticeOverlay">
+            <div class="notice-modal">
+                <div class="notice-header">
+                    <div class="notice-title">
+                        <span>📢</span>
+                        <span>网站公告</span>
+                    </div>
+                    <button class="notice-close" onclick="closeNotice()">✕</button>
+                </div>
+                <div class="notice-content">
+                    {{ notice.content | safe }}
+                </div>
+                <div class="notice-footer">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="dontShowAgain" onchange="toggleHideNotice('{{ notice_key }}')">
+                        <span class="checkmark"></span>
+                        不再显示此公告
+                    </label>
+                    <button class="notice-close-btn" onclick="closeNotice()">确定</button>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
     <div class="header">
         <h1>
             📦 资源分享
@@ -337,98 +569,217 @@
             </div>
         {% endif %}
     </div>
-
     <div class="container">
-        {% if resources %}
-            <div class="grid">
-                {% for item in resources %}
-                <div class="card">
-                    <div class="card-header-line">
-                        <div class="card-title-group">
-                            <div class="status-dot"></div>
-                            <h2>{{ item.name }}</h2>
-                        </div>
-                        <span class="date">{{ item.created_at[:10] if item.created_at else '' }}</span>
+    {% if resources %}
+        <div class="grid">
+            {% for item in resources %}
+            <div class="card">
+                <div class="card-header-line">
+                    <div class="card-title-group">
+                        <div class="status-dot"></div>
+                        <h2>{{ item.name }}</h2>
                     </div>
-                    
-                    {% if item.description %}
-                    <p class="desc">{{ item.description }}</p>
-                    {% endif %}
-
-                    {% if item.tags %}
-                    <div class="tags">
-                        {% for tag in item.tags.split('，') %}
-                            {% for t in tag.split(',') %}
-                                {% if t.strip() %}
-                                <span class="tag">#{{ t.strip() }}</span>
-                                {% endif %}
-                            {% endfor %}
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-
-                    <div class="actions">
-                        {% if item.tg_link %}
-                        <a href="{{ item.tg_link }}" target="_blank" class="btn btn-tg">✈️ Telegram 频道</a>
-                        {% endif %}
-
-                        {% if item.pan_link %}
-                        <div class="pan-group">
-                            <a href="{{ item.pan_link }}" target="_blank" class="btn btn-pan">
-                                ☁️ 下载链接
-                            </a>
-                            {% if item.pan_pass %}
-                            <div class="pan-pass">密码: {{ item.pan_pass }}</div>
-                            {% endif %}
-                        </div>
-                        {% endif %}
-                    </div>
+                    <span class="date">{{ item.updated_at[:10] if item.updated_at else (item.created_at[:10] if item.created_at else '') }}</span>
                 </div>
-                {% endfor %}
+                  
+                {% if item.description %}
+                <p class="desc">{{ item.description }}</p>
+                {% endif %}
+
+                {% if item.tags %}
+                <div class="tags">
+                    {% for tag in item.tags.split('，') %}
+                        {% for t in tag.split(',') %}
+                            {% if t.strip() %}
+                            <a href="/?q={{ t.strip() }}" class="tag-link">#{{ t.strip() }}</a>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="actions">
+                    {% if item.tg_link %}
+                    <a href="{{ item.tg_link }}" target="_blank" class="btn btn-tg">✈️ Telegram 频道</a>
+                    {% endif %}
+
+                    {% if item.pan_link %}
+                    <div class="pan-group">
+                        <a href="{{ item.pan_link }}" target="_blank" class="btn btn-pan">
+                            ☁️ 下载链接
+                        </a>
+                        {% if item.pan_pass %}
+                        <div class="pan-pass">密码: {{ item.pan_pass }}</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        {% if search_query %}
+            <div class="empty-state">
+                <h3>🔍 没有找到相关资源</h3>
+                <p>试试其他关键词，或者<a href="/" style="color: #007bff;">返回主页查看所有资源</a></p>
+                <p style="margin-top: 10px; font-size: 12px; color: #999;">
+                    当前搜索: 「{{ search_query }}」
+                </p>
             </div>
         {% else %}
-            {% if search_query %}
-                <div class="empty-state">
-                    <h3>🔍 没有找到相关资源</h3>
-                    <p>试试其他关键词，或者<a href="/" style="color: #007bff;">返回主页查看所有资源</a></p>
-                    <p style="margin-top: 10px; font-size: 12px; color: #999;">
-                        当前搜索: 「{{ search_query }}」
-                    </p>
-                </div>
-            {% else %}
-                <div class="empty-state">
-                    <h3>📝 还没有任何资源</h3>
-                    <p style="font-size: 12px; color: #666; margin-top: 5px;">
-                        如需添加资源，请联系管理员
-                    </p>
-                </div>
-            {% endif %}
+            <div class="empty-state">
+                <h3>📝 还没有任何资源</h3>
+                <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                    如需添加资源，请联系管理员
+                </p>
+            </div>
         {% endif %}
-    </div>
+    {% endif %}
+</div>
 
-    <script>
-        // 添加搜索框清空功能
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.querySelector('.search-input');
-            if (searchInput) {
-                // ESC键清空搜索
-                searchInput.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape') {
-                        this.value = '';
-                        this.blur();
-                    }
-                });
-                
-                // Ctrl+K 或 Cmd+K 快捷键聚焦搜索框
-                document.addEventListener('keydown', function(e) {
-                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                        e.preventDefault();
-                        searchInput.focus();
-                        searchInput.select();
-                    }
-                });
+<script>
+    // 检查是否应该显示公告
+    function shouldShowNotice() {
+        // 从模板中获取当前公告的唯一键
+        const noticeKey = "{{ notice_key }}";
+        if (noticeKey) {
+            const hideNotice = localStorage.getItem(noticeKey);
+            if (hideNotice === 'true') {
+                return false;
             }
-        });
-    </script>
+        }
+        return true;
+    }
+
+    // 关闭公告弹窗（本次访问）
+    function closeNotice() {
+        const noticeOverlay = document.getElementById('noticeOverlay');
+        if (noticeOverlay) {
+            // 添加关闭动画
+            const modal = noticeOverlay.querySelector('.notice-modal');
+            modal.style.animation = 'slideUp 0.3s ease reverse';
+            
+            setTimeout(() => {
+                noticeOverlay.style.animation = 'fadeIn 0.3s ease reverse';
+            }, 100);
+            
+            setTimeout(() => {
+                noticeOverlay.remove();
+                document.body.style.overflow = 'auto';
+            }, 400);
+        }
+    }
+
+    // 处理复选框状态变化 - 与特定公告ID和时间戳绑定
+    function toggleHideNotice(noticeKey) {
+        const checkbox = document.getElementById('dontShowAgain');
+        if (checkbox.checked) {
+            localStorage.setItem(noticeKey, 'true');
+        } else {
+            localStorage.removeItem(noticeKey);
+        }
+    }
+
+    // 按ESC键关闭公告
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeNotice();
+        }
+    });
+
+    // 点击遮罩层关闭公告
+    document.addEventListener('click', function(e) {
+        if (e.target.id === 'noticeOverlay') {
+            closeNotice();
+        }
+    });
+
+    // 页面加载时检查是否应该显示公告
+    document.addEventListener('DOMContentLoaded', function() {
+        const noticeOverlay = document.getElementById('noticeOverlay');
+        
+        // 如果有公告但用户选择不再显示，则移除
+        if (noticeOverlay && !shouldShowNotice()) {
+            noticeOverlay.remove();
+            return;
+        }
+
+        // 如果显示公告，禁止背景滚动
+        if (noticeOverlay) {
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 检查本地存储中是否已经设置过不再显示当前公告
+        const noticeKey = "{{ notice_key }}";
+        if (noticeKey && localStorage.getItem(noticeKey) === 'true') {
+            document.getElementById('dontShowAgain').checked = true;
+        }
+
+        const searchInput = document.querySelector('.search-input');
+        if (searchInput) {
+            // ESC键清空搜索（如果没有公告弹窗的话）
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !document.getElementById('noticeOverlay')) {
+                    this.value = '';
+                    this.blur();
+                }
+            });
+              
+            // Ctrl+K 或 Cmd+K 快捷键聚焦搜索框
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    searchInput.focus();
+                    searchInput.select();
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    .checkbox-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-size: 12px;
+        color: #6c757d;
+    }
+
+    .checkbox-container input[type="checkbox"] {
+        display: none;
+    }
+
+    .checkmark {
+        width: 14px;
+        height: 14px;
+        border: 2px solid #6c757d;
+        border-radius: 3px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .checkbox-container input[type="checkbox"]:checked + .checkmark {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+
+    .checkmark::after {
+        content: "✓";
+        color: white;
+        font-size: 10px;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .checkbox-container input[type="checkbox"]:checked + .checkmark::after {
+        opacity: 1;
+    }
+</style>
+
 </body>
 </html>
