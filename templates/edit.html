@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编辑资源</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            background: #f4f6f8; 
+            margin: 0; 
+            padding: 20px; 
+        }
+        
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background: white; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+            padding: 30px; 
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .home-link {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 5px 10px;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .home-link:hover {
+            background: #007bff;
+            color: white;
+        }
+        
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-label { 
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 8px; 
+            font-weight: bold; 
+            font-size: 14px; 
+            color: #333; 
+        }
+        
+        .required {
+            color: #dc3545;
+            margin-left: 4px;
+        }
+        
+        input[type="text"], input[type="url"], textarea { 
+            width: 100%; 
+            padding: 12px; 
+            box-sizing: border-box; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            font-size: 14px; 
+            transition: border-color 0.2s;
+        }
+        
+        input[type="text"]:focus, input[type="url"]:focus, textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        
+        textarea { 
+            resize: vertical; 
+            min-height: 80px; 
+        }
+        
+        .row { 
+            display: flex; 
+            gap: 15px; 
+        }
+        
+        .col { 
+            flex: 1; 
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        .btn { 
+            flex: 1;
+            padding: 12px 20px; 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            transition: background 0.2s;
+        }
+        
+        .btn:hover { 
+            background: #0056b3; 
+        }
+        
+        .btn-cancel {
+            background: #6c757d;
+        }
+        
+        .btn-cancel:hover {
+            background: #545b62;
+        }
+        
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .btn-delete:hover {
+            background: #c82333;
+        }
+        
+        .hint { 
+            font-size: 12px; 
+            color: #999; 
+            margin-top: 5px; 
+        }
+        
+        .link-example {
+            font-size: 12px;
+            color: #999;
+            font-style: italic;
+            margin-top: 4px;
+        }
+        
+        .delete-section {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+        
+        .delete-warning {
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✏️ 编辑资源</h1>
+            <a href="{{ url_for('admin') }}" class="home-link">← 返回管理</a>
+        </div>
+        
+        <form method="POST">
+            <!-- 资源名称 -->
+            <div class="form-group">
+                <label class="form-label">
+                    {{ form_config.name.label }} <span class="required">*</span>
+                </label>
+                <input type="text" name="name" required placeholder="{{ form_config.name.placeholder }}" value="{{ resource.name or '' }}">
+            </div>
+
+            <!-- 资源类型 -->
+            <div class="form-group">
+                <label class="form-label">
+                    {{ form_config.r_type.label }}
+                </label>
+                <input type="text" list="types" name="r_type" placeholder="{{ form_config.r_type.placeholder }}" value="{{ resource.r_type or '' }}">
+                <datalist id="types">
+                    {% for option in form_config.r_type.options %}
+                        <option value="{{ option }}">
+                    {% endfor %}
+                </datalist>
+                <div class="link-example">示例: 软件工具, 影视资源, 学习教程</div>
+            </div>
+
+            <!-- 描述 -->
+            <div class="form-group">
+                <label class="form-label">
+                    {{ form_config.description.label }}
+                </label>
+                <textarea name="description" rows="3" placeholder="{{ form_config.description.placeholder }}">{{ resource.description or '' }}</textarea>
+            </div>
+
+            <!-- Telegram 链接 -->
+            <div class="form-group">
+                <label class="form-label">
+                    {{ form_config.tg_link.label }}
+                </label>
+                <input type="url" name="tg_link" placeholder="{{ form_config.tg_link.placeholder }}" value="{{ resource.tg_link or '' }}">
+                <div class="link-example">格式: https://t.me/your_channel</div>
+            </div>
+
+            <!-- 网盘链接和密码 -->
+            <div class="row">
+                <div class="col" style="flex: 2;">
+                    <label class="form-label">
+                        {{ form_config.pan_link.label }}
+                    </label>
+                    <input type="url" name="pan_link" placeholder="{{ form_config.pan_link.placeholder }}" value="{{ resource.pan_link or '' }}">
+                    <div class="link-example">支持: 百度网盘, 阿里云盘等</div>
+                </div>
+                <div class="col">
+                    <label class="form-label">
+                        {{ form_config.pan_pass.label }}
+                    </label>
+                    <input type="text" name="pan_pass" placeholder="{{ form_config.pan_pass.placeholder }}" value="{{ resource.pan_pass or '' }}">
+                </div>
+            </div>
+
+            <!-- 标签 -->
+            <div class="form-group">
+                <label class="form-label">
+                    {{ form_config.tags.label }}
+                </label>
+                <input type="text" name="tags" placeholder="{{ form_config.tags.placeholder }}" value="{{ resource.tags or '' }}">
+                {% if form_config.tags.hint %}
+                    <div class="hint">{{ form_config.tags.hint }}</div>
+                {% endif %}
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn">💾 保存修改</button>
+                <button type="button" class="btn btn-cancel" onclick="window.location.href='{{ url_for('admin') }}'">取消</button>
+            </div>
+        </form>
+        
+        <div class="delete-section">
+            <form method="POST" action="{{ url_for('delete_resource', resource_id=resource.id) }}" 
+                  onsubmit="return confirm('确定要删除这个资源吗？此操作不可撤销。')">
+                <button type="submit" class="btn-delete">🗑️ 删除此资源</button>
+            </form>
+            <div class="delete-warning">删除操作不可撤销，请谨慎操作</div>
+        </div>
+    </div>
+</body>
+</html>
