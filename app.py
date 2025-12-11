@@ -9,7 +9,7 @@ import shutil
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'  # 添加secret_key用于flash消息
 
-# 自定义表单配置
+# 自定义表单
 FORM_CONFIG = {
     'name': {
         'label': '资源名称',
