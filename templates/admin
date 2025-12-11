@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>资源管理</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            background: #f4f6f8; 
+            margin: 0; 
+            padding: 20px; 
+        }
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+        }
+        
+        .admin-header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .admin-header h1 {
+            margin: 0 0 10px 0;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .home-link {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 5px 10px;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .home-link:hover {
+            background: #007bff;
+            color: white;
+        }
+        
+        .admin-header p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .admin-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .form-box, .manage-box { 
+            background: white; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+        }
+        
+        .form-box { 
+            padding: 30px; 
+        }
+        
+        .manage-box {
+            padding: 20px;
+        }
+        
+        h2 { 
+            margin-top: 0; 
+            border-bottom: 2px solid #007bff; 
+            padding-bottom: 10px; 
+            display: inline-block; 
+        }
+        
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-label { 
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 8px; 
+            font-weight: bold; 
+            font-size: 14px; 
+            color: #333; 
+        }
+        
+        .required {
+            color: #dc3545;
+            margin-left: 4px;
+        }
+        
+        input[type="text"], input[type="url"], textarea { 
+            width: 100%; 
+            padding: 12px; 
+            box-sizing: border-box; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            font-size: 14px; 
+            transition: border-color 0.2s;
+        }
+        
+        input[type="text"]:focus, input[type="url"]:focus, textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        
+        textarea { 
+            resize: vertical; 
+        }
+        
+        .row { 
+            display: flex; 
+            gap: 15px; 
+        }
+        
+        .col { 
+            flex: 1; 
+        }
+        
+        .btn { 
+            width: 100%; 
+            padding: 12px; 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            margin-top: 10px; 
+            transition: background 0.2s;
+        }
+        
+        .btn:hover { 
+            background: #0056b3; 
+        }
+        
+        .btn-edit {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .btn-edit:hover {
+            background: #218838;
+        }
+        
+        .link-home { 
+            display: block; 
+            text-align: center; 
+            margin-top: 20px; 
+            color: #666; 
+            text-decoration: none; 
+        }
+        
+        .hint { 
+            font-size: 12px; 
+            color: #999; 
+            margin-top: 5px; 
+        }
+        
+        .resource-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .resource-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: move;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+        }
+        
+        .resource-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: #fff;
+        }
+        
+        .resource-item.sortable-ghost {
+            opacity: 0.4;
+            background: #e3f2fd;
+        }
+        
+        .resource-item.sortable-drag {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: rotate(2deg);
+            background: #fff;
+        }
+        
+        .drag-handle {
+            color: #999;
+            font-size: 20px;
+            cursor: grab;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        
+        .drag-handle:hover {
+            color: #007bff;
+            background: rgba(0, 123, 255, 0.1);
+        }
+        
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+        
+        .resource-info {
+            flex: 1;
+        }
+        
+        .resource-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .resource-type {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .resource-desc {
+            color: #888;
+            font-size: 13px;
+        }
+        
+        .empty-resources {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+        }
+        
+        .save-indicator {
+            text-align: center;
+            padding: 10px;
+            background: #d4edda;
+            color: #155724;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .drag-tip {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 12px;
+            color: #1976d2;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .drag-tip::before {
+            content: "💡";
+            font-size: 16px;
+        }
+        
+        .link-example {
+            font-size: 12px;
+            color: #999;
+            font-style: italic;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="admin-header">
+            <h1>
+                🔧 资源管理中心
+                <a href="/" class="home-link">🏠 返回主页</a>
+            </h1>
+            <p>拖拽资源卡片可以调整显示顺序，新添加的资源会排在最后。点击编辑按钮可以修改资源信息。</p>
+        </div>
+        
+        <div class="admin-content">
+            <!-- 左侧：添加资源表单 -->
+            <div class="form-box">
+                <h2>➕ 添加新资源</h2>
+                <form method="POST">
+                    <!-- 资源名称 -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            {{ form_config.name.label }} <span class="required">*</span>
+                        </label>
+                        <input type="text" name="name" required placeholder="{{ form_config.name.placeholder }}">
+                    </div>
+
+                    <!-- 资源类型 -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            {{ form_config.r_type.label }}
+                        </label>
+                        <input type="text" list="types" name="r_type" placeholder="{{ form_config.r_type.placeholder }}">
+                        <datalist id="types">
+                            {% for option in form_config.r_type.options %}
+                                <option value="{{ option }}">
+                            {% endfor %}
+                        </datalist>
+                        <div class="link-example">示例: 软件工具, 影视资源, 学习教程</div>
+                    </div>
+
+                    <!-- 描述 -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            {{ form_config.description.label }}
+                        </label>
+                        <textarea name="description" rows="3" placeholder="{{ form_config.description.placeholder }}"></textarea>
+                    </div>
+
+                    <!-- Telegram 链接 -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            {{ form_config.tg_link.label }}
+                        </label>
+                        <input type="url" name="tg_link" placeholder="{{ form_config.tg_link.placeholder }}">
+                        <div class="link-example">格式: https://t.me/your_channel</div>
+                    </div>
+
+                    <!-- 网盘链接和密码 -->
+                    <div class="row">
+                        <div class="col" style="flex: 2;">
+                            <label class="form-label">
+                                {{ form_config.pan_link.label }}
+                            </label>
+                            <input type="url" name="pan_link" placeholder="{{ form_config.pan_link.placeholder }}">
+                            <div class="link-example">支持: 百度网盘, 阿里云盘等</div>
+                        </div>
+                        <div class="col">
+                            <label class="form-label">
+                                {{ form_config.pan_pass.label }}
+                            </label>
+                            <input type="text" name="pan_pass" placeholder="{{ form_config.pan_pass.placeholder }}">
+                        </div>
+                    </div>
+
+                    <!-- 标签 -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            {{ form_config.tags.label }}
+                        </label>
+                        <input type="text" name="tags" placeholder="{{ form_config.tags.placeholder }}">
+                        {% if form_config.tags.hint %}
+                            <div class="hint">{{ form_config.tags.hint }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <button type="submit" class="btn">发布资源</button>
+                </form>
+                <a href="/" class="link-home">🏠 返回主页</a>
+            </div>
+            
+            <!-- 右侧：资源管理 -->
+            <div class="manage-box">
+                <h2>📋 资源排序管理</h2>
+                <div class="save-indicator" id="saveIndicator">
+                    ✅ 排序已保存
+                </div>
+                
+                <div class="drag-tip">
+                    拖拽左侧的 ⋮⋮ 图标可以调整资源显示顺序，点击编辑按钮修改资源信息
+                </div>
+                
+                {% if resources %}
+                    <ul class="resource-list" id="resourceList">
+                        {% for item in resources %}
+                            <li class="resource-item" data-id="{{ item.id }}">
+                                <span class="drag-handle">⋮⋮</span>
+                                <div class="resource-info">
+                                    <div class="resource-name">{{ item.name }}</div>
+                                    {% if item.r_type %}
+                                        <div class="resource-type">{{ item.r_type }}</div>
+                                    {% endif %}
+                                    {% if item.description %}
+                                        <div class="resource-desc">{{ item.description[:50] }}...</div>
+                                    {% endif %}
+                                </div>
+                                <div class="resource-actions">
+                                    <form method="GET" action="{{ url_for('edit_resource', resource_id=item.id) }}" 
+                                          style="display: inline;">
+                                        <button type="submit" class="btn-edit">✏️ 编辑</button>
+                                    </form>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="empty-resources">
+                        <p>📝 暂无资源</p>
+                        <p style="font-size: 12px; margin-top: 10px;">在左侧表单添加第一个资源开始吧！</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const resourceList = document.getElementById('resourceList');
+            const saveIndicator = document.getElementById('saveIndicator');
+            
+            if (resourceList) {
+                new Sortable(resourceList, {
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    dragClass: 'sortable-drag',
+                    handle: '.drag-handle',
+                    onUpdate: function(evt) {
+                        const itemIds = Array.from(resourceList.children).map(item => item.dataset.id);
+                        
+                        fetch('/admin/update_order', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(itemIds)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                saveIndicator.style.display = 'block';
+                                setTimeout(() => {
+                                    saveIndicator.style.display = 'none';
+                                }, 2000);
+                            } else {
+                                alert('保存失败：' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('保存排序时出错，请重试');
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
